@@ -2,7 +2,7 @@
 Here lives all the data logger code of my antics. (Or at least there's supposed to be... Nothing for now.)
 
 ### TODO:
-- [ ] add basic serial data logging. Anything in any format for now.
+- [x] add basic serial data logging. Anything in any format for now.
 - [ ] add WIFI connection
 - [ ] add onboard LED blink code for error state
 - [ ] add ring buffer for network dropout resilience (calculate size based on available memory)
