@@ -22,7 +22,8 @@ TwoWire I2C_2 = TwoWire(1);
 INA226 ina_1(0x40, &I2C_1);
 INA226 ina_2(0x40, &I2C_2);
 
-void Panic(const char* message) {
+void Panic(const char *message)
+{
     Serial.println(message);
     while (1) {
         digitalWrite(PIN_ONBOARD_LED, HIGH);
@@ -32,7 +33,8 @@ void Panic(const char* message) {
     }
 }
 
-void setup() {
+void setup()
+{
     Serial.begin(115200);
 
     pinMode(PIN_ONBOARD_LED, OUTPUT);
@@ -56,7 +58,6 @@ void setup() {
         Serial.print("ina_1.setMaxCurrentShunt: ");
         Serial.println(error, HEX);
         Panic("Error configuring INA1");
-
     }
     error = ina_2.setMaxCurrentShunt(0.8, 0.1); // e.g., 0.8A max, 100 mOhm shunt
     if (error) {
@@ -87,7 +88,7 @@ void setup() {
 
     // delay(1000);
     Serial.println("Press any key to start the power supply...");
-    while(Serial.available() == 0) {
+    while (Serial.available() == 0) {
         delay(10);
     }
 
@@ -97,8 +98,8 @@ void setup() {
     digitalWrite(PIN_PS_ON_S8050, HIGH);
 }
 
-void loop() {
-
+void loop()
+{
     float v1 = ina_1.getBusVoltage();
     float i1 = ina_1.getCurrent_mA();
     float v2 = ina_2.getBusVoltage();
@@ -106,10 +107,11 @@ void loop() {
     bool pg = digitalRead(PIN_PWR_GOOD);
 
     char buffer[256];
-    int len = snprintf(buffer, sizeof(buffer), "%8lu ms, %8.3f V, %8.3f mA, %8.3f V, %8.3f mA, %8s\n",
-                       millis(), v1, i1, v2, i2, pg ? "TRUE" : "FALSE");
+    int len = snprintf(buffer, sizeof(buffer),
+                       "%8lu ms, %8.3f V, %8.3f mA, %8.3f V, %8.3f mA, %8s\n", millis(), v1, i1, v2,
+                       i2, pg ? "TRUE" : "FALSE");
 
-    Serial.write((uint8_t*)buffer, len);
+    Serial.write((uint8_t *)buffer, len);
 
     delay(10);
 }
