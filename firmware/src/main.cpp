@@ -19,6 +19,8 @@
 TwoWire I2C_1 = TwoWire(0);
 TwoWire I2C_2 = TwoWire(1);
 
+// TODO: add compile time test series flags & configs (eg. shunt value, max current, sensor type, etc)
+// TODO: check if the INA lib confirms if the INA is actually the correct device (eg. check manufacturer ID & device ID registers)
 INA226 ina_1(0x40, &I2C_1);
 INA226 ina_2(0x40, &I2C_2);
 
@@ -98,18 +100,47 @@ void setup()
     digitalWrite(PIN_PS_ON_S8050, HIGH);
 }
 
+struct TestData {
+    uint16_t timestamp_ms;
+    uint8_t power_good;
+    uint8_t power_on;
+    struct {
+        float voltage_V;
+        float current_mA;
+        float power_mW;
+    } sensor_1, sensor_2;
+};
+volatile static struct TestData test_data[10000];
+static_assert(sizeof(test_data) <= 320 * 1024);
+
+
 void loop()
 {
+    // TODO: add WIFI connection
+    // TODO: add NTP time sync
+    // TODO: implement actuall test series (milliseconds, 2xVoltages, 2xCurrents, 2xPowers, PowerGood, PowerOn)
+    // TODO: 1st step, wait for power rails to stabilise
+    // TODO: 2nd step, run test series
+    // TODO:   ~0.1~0.5s pre power on
+    // TODO:   ~6s spinup spike (high fidelity)
+    // TODO:   ~15s power on (low fidelity)
+    // TODO:   ~15s power off /OR till power stabilised (12V rail ~ <2V) (low fidelity)
+    // TODO: 3rd step, compress & send data to server
+    // TODO: 4th step, optionaly repeat test series
+
+
     float v1 = ina_1.getBusVoltage();
     float i1 = ina_1.getCurrent_mA();
+    float w1 = ina_1.getPower_mW();
     float v2 = ina_2.getBusVoltage();
     float i2 = ina_2.getCurrent_mA();
+    float w2 = ina_2.getPower_mW();
     bool pg = digitalRead(PIN_PWR_GOOD);
 
     char buffer[256];
     int len = snprintf(buffer, sizeof(buffer),
-                       "%8lu ms, %8.3f V, %8.3f mA, %8.3f V, %8.3f mA, %8s\n", millis(), v1, i1, v2,
-                       i2, pg ? "TRUE" : "FALSE");
+                       "%8lu ms, %8.3f V, %8.3f mA, %8.3f mW, %8.3f V, %8.3f mA, %8.3f mW, %8s\n",
+                       millis(), v1, i1, w1, v2, i2, w2, pg ? "TRUE" : "FALSE");
 
     Serial.write((uint8_t *)buffer, len);
 
